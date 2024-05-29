@@ -65,4 +65,9 @@ class Controller:
             self._view.txtOut3.controls.append(ft.Text(f"Numero di archi minimi inferiore a 2"))
             self._view.update_page()
             return
-        self._model.cercaPercorso(nMax)
+        somma, diz = self._model.cercaPercorso(nMax)
+        self._view.txtOut3.clean()
+        self._view.txtOut3.controls.append(ft.Text(f"Peso cammino massimo: {somma}"))
+        for i in diz:
+            self._view.txtOut3.controls.append(ft.Text(f"{i[0]} --> {i[1]}: {diz[i]}"))
+        self._view.update_page()

@@ -1,3 +1,5 @@
+import copy
+
 import networkx as nx
 
 from database.DAO import DAO
@@ -28,36 +30,50 @@ class Model:
     def cercaPercorso(self, nMax):
         self.solBest = []
         self.sommaArchi = 0
+        soluzione = {}
         for n in list(self.grafo.nodes):
             self.ricorsione(n, nMax, [n])
+        print(self.sommaArchi)
         print(self.solBest)
+        for i in range(len(self.solBest)-1):
+            #print(self.solBest[i], "-",self.solBest[i+1])
+            soluzione[(self.solBest[i], self.solBest[i+1])] = self.grafo[self.solBest[i]][self.solBest[i+1]]["weight"]
+        return self.sommaArchi, soluzione
 
 
     def ricorsione(self, nodo, nMax, parziale):
 
         if len(parziale) == nMax+1 :
             somma = 0
+            # for i in parziale:
+            #     print(i)
+            # print()
             for i in range(len(parziale)-1):
                 somma += self.grafo[parziale[i]][parziale[i+1]]["weight"]
             if somma > self.sommaArchi:
                 self.sommaArchi = somma
-                self.solBest = parziale
+                self.solBest = copy.deepcopy(parziale)
+                return
 
 
 
         else:
             vicini = list(nx.neighbors(self.grafo, nodo))
             for v in vicini:
-                parziale.append(v)
-                if self.vincoli(parziale, nMax):
+                if self.vincoli(v, nMax, parziale):
+                    parziale.append(v)
                     self.ricorsione(v, nMax, parziale)
-                parziale.pop()
+                    parziale.pop()
 
-    def vincoli(self, parziale, nMax):
-        if len(parziale) < nMax +1 :
-            return True
-        elif len(parziale) == nMax + 1 and parziale[0] == parziale[-1]:
-            return True
+    def vincoli(self, v, nMax, parziale):
+        if v not in parziale:
+            if len(parziale)+1 < nMax +1 :
+                return True
+            # elif len(parziale)+1 == nMax + 1 and parziale[0] == v:
+            #     return True
+        else:
+            if v == parziale[0] and len(parziale) + 1 == nMax+1:
+                return True
         return False
 
 
