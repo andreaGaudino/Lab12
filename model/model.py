@@ -77,3 +77,17 @@ class Model:
         return False
 
 
+
+# select gds2.Retailer_code , gds.Retailer_code , count(distinct(gds.Product_number)) as conteggio
+# from go_sales.go_daily_sales gds , go_sales.go_daily_sales gds2, go_sales.go_retailers gr, go_sales.go_retailers gr2
+# where year(gds2.`Date`) = 2015
+# and year(gds.`Date`) = 2015
+# and gds2.Retailer_code != gds.Retailer_code
+# and gds2.Product_number = gds.Product_number
+# and gr.Retailer_code  = gds.Retailer_code
+# and gr2.Retailer_code= gds2.Retailer_code
+# and gr.Country = 'France'
+# and gr2.Country = 'France'
+# group by gds2.Retailer_code , gds.Retailer_code
+
+
