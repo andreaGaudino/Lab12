@@ -1,4 +1,5 @@
 import copy
+import time
 
 import networkx as nx
 
@@ -15,26 +16,25 @@ class Model:
 
     def buildGraph(self, anno, nazione):
         self.grafo.clear()
-        self.grafo.add_nodes_from(DAO.getAllRetailers(nazione))
-        for n in list(self.grafo.nodes):
+        nodi = DAO.getAllRetailers(nazione)
+        for n in nodi:
             self.idMap[n.Retailer_code] = n
-
-        s = 0
-        for r1 in list(self.grafo.nodes):
-            lista = DAO.getArchi(r1.Retailer_code, anno, nazione)
-            for i in lista:
-                r2 = self.idMap[i[0]]
-                self.grafo.add_edge(r1, r2, weight = i[1])
-
+            self.grafo.add_node(n)
+        archi = DAO.getArchi(anno, nazione)
+        for a in archi:
+            self.grafo.add_edge(self.idMap[a[0]], self.idMap[a[1]], weight = a[2])
 
     def cercaPercorso(self, nMax):
         self.solBest = []
         self.sommaArchi = 0
         soluzione = {}
+        start = time.time()
         for n in list(self.grafo.nodes):
             self.ricorsione(n, nMax, [n])
-        print(self.sommaArchi)
-        print(self.solBest)
+        end = time.time()
+        print(end-start)
+        #print(self.sommaArchi)
+        #print(self.solBest)
         for i in range(len(self.solBest)-1):
             #print(self.solBest[i], "-",self.solBest[i+1])
             soluzione[(self.solBest[i], self.solBest[i+1])] = self.grafo[self.solBest[i]][self.solBest[i+1]]["weight"]

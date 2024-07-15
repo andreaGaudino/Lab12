@@ -47,23 +47,29 @@ class DAO():
         return result
 
     @staticmethod
-    def getArchi(r1, anno, country):
+    def getArchi(anno, country):
         conn = DBConnect.get_connection()
 
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = """select gds.Retailer_code , count(distinct(gds.Product_number)) as conteggio
-from go_sales.go_daily_sales gds , go_sales.go_daily_sales gds2, go_sales.go_retailers gr
-where year(gds2.`Date`) = %s and year(gds.`Date`) = %s and gds2.Retailer_code = %s and gds.Retailer_code!= %s and gds2.Product_number = gds.Product_number and gr.Retailer_code  = gds.Retailer_code and gr.Country = %s
-group by gds.Retailer_code 
-
+        query = """select gr.Retailer_code as r1, gr2.Retailer_code as r2, count(distinct gds.Product_number) as weight
+                    from go_retailers gr , go_retailers gr2 , go_daily_sales gds , go_daily_sales gds2 
+                    where gr2.Country = %s
+                    and gr.Country = gr2.Country 
+                    and gr2.Retailer_code < gr.Retailer_code
+                    and gds2.Retailer_code = gr2.Retailer_code 
+                    and gds.Retailer_code = gr.Retailer_code
+                    and year (gds2.`Date` ) = %s
+                    and year (gds.`Date` ) = year (gds2.`Date` )
+                    and gds2.Product_number = gds.Product_number 
+                    group by gr.Retailer_code, gr2.Retailer_code 
                 """
 
-        cursor.execute(query, (anno, anno, r1, r1,   country))
+        cursor.execute(query, (country, anno))
 
         for row in cursor:
-            result.append((row["Retailer_code"],row["conteggio"]))
+            result.append((row["r1"],row["r2"], row["weight"]))
 
         cursor.close()
         conn.close()
